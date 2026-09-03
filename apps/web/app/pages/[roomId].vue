@@ -143,6 +143,8 @@ const uploadFile = async (event: Event) => {
   if (!target.files || target.files.length === 0) return;
   
   const file = target.files[0];
+  if (!file) return;
+
   if (file.size > 50 * 1024 * 1024) {
     alert('File size exceeds 50MB limit');
     target.value = '';
