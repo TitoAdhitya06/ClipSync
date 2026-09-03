@@ -60,18 +60,6 @@ onMounted(() => {
   if (import.meta.client) {
     currentUrl.value = window.location.href;
     open();
-    
-    // Automatically replace localhost with local IP for QR code
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      fetch(`${httpUrl.value}/ip`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.ip && data.ip !== 'localhost') {
-            currentUrl.value = currentUrl.value.replace(window.location.hostname, data.ip);
-          }
-        })
-        .catch(err => console.error('Failed to get local IP', err));
-    }
   }
 });
 
@@ -320,6 +308,10 @@ const formatSize = (bytes: number) => {
         <h2 class="text-xl font-bold text-white mb-2 text-center">Share Room</h2>
         <p class="text-slate-400 text-sm text-center mb-6">Scan this QR code to join this clipboard room on another device.</p>
         
+        <div v-if="currentUrl.includes('localhost') || currentUrl.includes('127.0.0.1')" class="bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs p-3 rounded-lg mb-6 w-full text-center">
+          <strong>Warning:</strong> You are using localhost. Other devices won't be able to connect. Please open this app via your Wi-Fi IP address instead.
+        </div>
+
         <div class="bg-white p-4 rounded-xl shadow-inner mb-6">
           <qrcode-vue :value="currentUrl" :size="200" level="M" />
         </div>
