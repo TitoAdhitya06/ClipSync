@@ -1,5 +1,5 @@
 # ---- Build stage ----
-FROM node:20-alpine AS build
+FROM node:22-alpine AS build
 
 RUN corepack enable && corepack prepare pnpm@9.15.4 --activate
 
@@ -8,22 +8,18 @@ WORKDIR /app
 # Copy workspace root files
 COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
 
-# Copy only the packages needed for this app
-COPY packages/shared/package.json packages/shared/
-COPY apps/web/package.json apps/web/
+# Copy all workspace packages (both shared and web)
+COPY packages/shared/ packages/shared/
+COPY apps/web/ apps/web/
 
 # Install dependencies
 RUN pnpm install --frozen-lockfile
-
-# Copy source code
-COPY packages/shared/ packages/shared/
-COPY apps/web/ apps/web/
 
 # Build Nuxt SSR
 RUN pnpm --filter @clipboard-lokal/web run build
 
 # ---- Production stage ----
-FROM node:20-alpine
+FROM node:22-alpine
 
 WORKDIR /app
 

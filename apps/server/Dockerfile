@@ -2,7 +2,10 @@ FROM oven/bun:1
 
 WORKDIR /app
 
-# Copy workspace root package.json for workspace resolution
+# Copy bunfig for workspace resolution
+COPY bunfig.toml ./
+
+# Copy workspace configuration
 COPY package.json pnpm-workspace.yaml ./
 
 # Copy shared package (source — Bun consumes .ts directly)
@@ -17,7 +20,7 @@ COPY apps/server/src/ apps/server/src/
 
 WORKDIR /app/apps/server
 
-# Install dependencies (resolves workspace:* links)
+# Install dependencies—Bun will use bunfig.toml to resolve workspace:* references
 RUN bun install
 
 ENV WS_PORT=3001
