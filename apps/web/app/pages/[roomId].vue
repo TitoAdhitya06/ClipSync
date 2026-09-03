@@ -2,7 +2,7 @@
 import { ref, watch, onMounted, computed, nextTick } from 'vue';
 import { useRoute } from 'vue-router';
 import { useWebSocket, useDocumentVisibility } from '@vueuse/core';
-import { ClipboardList, Send, Wifi, WifiOff, Loader2 } from '@lucide/vue';
+import { ClipboardList, Send, Wifi, WifiOff, Loader2, Paperclip, File as FileIcon, Download } from '@lucide/vue';
 import { MessageType } from '@clipboard-lokal/shared';
 import type { ClipboardMessage, ClipboardEntry, JoinMessage, PasteMessage, SyncMessage, HistoryMessage, ErrorMessage } from '@clipboard-lokal/shared';
 
@@ -13,6 +13,8 @@ const visibility = useDocumentVisibility();
 const entries = ref<ClipboardEntry[]>([]);
 const inputText = ref('');
 const listContainer = ref<HTMLElement | null>(null);
+const fileInput = ref<HTMLInputElement | null>(null);
+const isUploading = ref(false);
 
 // Format timestamp
 const formatTime = (ts: number) => {
@@ -26,6 +28,11 @@ const wsUrl = computed(() => {
     return `ws://${window.location.hostname}:3001`;
   }
   return '';
+});
+
+// HTTP URL for file uploads/downloads
+const httpUrl = computed(() => {
+  return wsUrl.value.replace('ws://', 'http://').replace('wss://', 'https://');
 });
 
 // Setup WebSocket
@@ -124,6 +131,55 @@ const submitPaste = () => {
     inputText.value = '';
   }
 };
+
+const triggerFileUpload = () => {
+  if (fileInput.value) {
+    fileInput.value.click();
+  }
+};
+
+const uploadFile = async (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  if (!target.files || target.files.length === 0) return;
+  
+  const file = target.files[0];
+  if (file.size > 50 * 1024 * 1024) {
+    alert('File size exceeds 50MB limit');
+    target.value = '';
+    return;
+  }
+  
+  isUploading.value = true;
+  try {
+    const formData = new FormData();
+    formData.append('roomId', roomId);
+    formData.append('file', file);
+    
+    const response = await fetch(`${httpUrl.value}/upload`, {
+      method: 'POST',
+      body: formData
+    });
+    
+    if (!response.ok) {
+      throw new Error(await response.text());
+    }
+    
+    target.value = ''; // Reset input
+  } catch (err) {
+    console.error('Upload failed:', err);
+    alert('Failed to upload file');
+  } finally {
+    isUploading.value = false;
+  }
+};
+
+const formatSize = (bytes: number) => {
+  if (bytes === 0) return '0 B';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+};
 </script>
 
 <template>
@@ -168,7 +224,22 @@ const submitPaste = () => {
             {{ formatTime(entry.ts) }}
           </div>
         </div>
-        <div class="text-slate-200 whitespace-pre-wrap wrap-break-word leading-relaxed font-mono text-sm bg-slate-900/50 p-3 rounded-lg border border-slate-700/50">
+        
+        <div v-if="entry.file" class="bg-slate-900/50 p-4 rounded-lg border border-slate-700/50 flex items-center justify-between gap-4">
+          <div class="flex items-center gap-3 overflow-hidden">
+            <div class="p-2 bg-indigo-500/20 text-indigo-400 rounded">
+              <FileIcon :size="20" />
+            </div>
+            <div class="truncate">
+              <p class="text-slate-200 font-medium truncate">{{ entry.file.name }}</p>
+              <p class="text-xs text-slate-500 mt-0.5">{{ formatSize(entry.file.size) }}</p>
+            </div>
+          </div>
+          <a :href="`${httpUrl}${entry.file.url}`" target="_blank" download class="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-colors shrink-0">
+            <Download :size="18" />
+          </a>
+        </div>
+        <div v-else class="text-slate-200 whitespace-pre-wrap wrap-break-word leading-relaxed font-mono text-sm bg-slate-900/50 p-3 rounded-lg border border-slate-700/50">
           {{ entry.text }}
         </div>
       </div>
@@ -177,7 +248,19 @@ const submitPaste = () => {
     <!-- Input Area -->
     <footer class="fixed bottom-0 left-0 right-0 p-4 bg-linear-to-t from-slate-900 via-slate-900 to-transparent">
       <div class="max-w-3xl mx-auto w-full">
-        <form @submit.prevent="submitPaste" class="glass-panel p-2 flex gap-2 shadow-2xl shadow-black">
+        <form @submit.prevent="submitPaste" class="glass-panel p-2 flex gap-2 shadow-2xl shadow-black relative">
+          <input type="file" ref="fileInput" class="hidden" @change="uploadFile" />
+          <button 
+            type="button" 
+            @click="triggerFileUpload"
+            class="p-3 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors flex items-center justify-center shrink-0 disabled:opacity-50"
+            :disabled="status !== 'OPEN' || isUploading"
+            title="Upload file (Max 50MB)"
+          >
+            <Loader2 v-if="isUploading" :size="20" class="animate-spin" />
+            <Paperclip v-else :size="20" />
+          </button>
+          
           <input 
             v-model="inputText" 
             type="text" 

@@ -17,7 +17,7 @@ process.env.WS_PORT = '0';
 
 import { server } from '../src/index';
 
-const WS_URL = `ws://localhost:${server.port}`;
+const getWsUrl = () => `ws://localhost:${server.port}`;
 
 describe('WebSocket Server', () => {
   beforeEach(async () => {
@@ -31,7 +31,7 @@ describe('WebSocket Server', () => {
 
   it('should allow joining a room and receive empty history', async () => {
     return new Promise<void>((resolve, reject) => {
-      const ws = new WebSocket(WS_URL);
+      const ws = new WebSocket(getWsUrl());
       
       ws.onopen = () => {
         const joinMsg: JoinMessage = {
@@ -59,7 +59,7 @@ describe('WebSocket Server', () => {
 
   it('should handle paste and broadcast history, enforce 50-entry cap, and set TTL', async () => {
     return new Promise<void>((resolve, reject) => {
-      const ws = new WebSocket(WS_URL);
+      const ws = new WebSocket(getWsUrl());
       let messageCount = 0;
       
       ws.onopen = () => {
@@ -116,7 +116,7 @@ describe('WebSocket Server', () => {
     await mockRedis.rpush('clipboard:test-room-sync', JSON.stringify({ text: 'Sync item', ts: Date.now() }));
 
     return new Promise<void>((resolve, reject) => {
-      const ws = new WebSocket(WS_URL);
+      const ws = new WebSocket(getWsUrl());
       
       let messageCount = 0;
       ws.onopen = () => {
@@ -159,7 +159,7 @@ describe('WebSocket Server', () => {
     };
 
     return new Promise<void>((resolve, reject) => {
-      const ws = new WebSocket(WS_URL);
+      const ws = new WebSocket(getWsUrl());
       
       ws.onopen = () => {
         // trigger a join which calls lrange

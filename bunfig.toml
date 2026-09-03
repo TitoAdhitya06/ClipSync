@@ -1,0 +1,6 @@
+[install]
+# Configure Bun to resolve workspace:* dependencies from node_modules/.pnpm
+linkablePackages = ["@clipboard-lokal/shared"]
+
+[resolve.alias]
+"@clipboard-lokal/shared" = "./packages/shared/src/index.ts"
