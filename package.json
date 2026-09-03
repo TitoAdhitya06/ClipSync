@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "pnpm --parallel -r run dev",
     "build": "pnpm -r run build",
-    "docker:up": "docker compose up --build -d",
+    "docker:up": "node scripts/start.mjs",
     "docker:down": "docker compose down"
   },
   "engines": {
