@@ -143,7 +143,6 @@ Jika ada parsing/validation logic di shared package (validasi bahwa message sesu
 ## Out of Scope
 
 - **UI/UX slicing** — desain visual, Tailwind styling, responsive layout. Murni di luar spec arsitektur ini.
-- **QR Code Generator** — fitur terpisah untuk sharing room ID via QR. Bukan bagian infrastruktur dasar.
 - **Authentication/authorization** — tidak ada login, tidak ada access control per room di v1.
 - **Rate limiting** — tidak ada di v1.
 - **Multi-server scaling** — single instance Bun server. Horizontal scaling bukan concern untuk jaringan lokal.

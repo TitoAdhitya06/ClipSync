@@ -2,7 +2,8 @@
 import { ref, watch, onMounted, computed, nextTick } from 'vue';
 import { useRoute } from 'vue-router';
 import { useWebSocket, useDocumentVisibility } from '@vueuse/core';
-import { ClipboardList, Send, Wifi, WifiOff, Loader2, Paperclip, File as FileIcon, Download } from '@lucide/vue';
+import { ClipboardList, Send, Wifi, WifiOff, Loader2, Paperclip, File as FileIcon, Download, QrCode, X } from '@lucide/vue';
+import QrcodeVue from 'qrcode.vue';
 import { MessageType } from '@clipboard-lokal/shared';
 import type { ClipboardMessage, ClipboardEntry, JoinMessage, PasteMessage, SyncMessage, HistoryMessage, ErrorMessage } from '@clipboard-lokal/shared';
 
@@ -15,6 +16,8 @@ const inputText = ref('');
 const listContainer = ref<HTMLElement | null>(null);
 const fileInput = ref<HTMLInputElement | null>(null);
 const isUploading = ref(false);
+const showQrModal = ref(false);
+const currentUrl = ref('');
 
 // Format timestamp
 const formatTime = (ts: number) => {
@@ -55,6 +58,7 @@ const { status, data, send, open, close } = useWebSocket(wsUrl.value, {
 // Sync on mount
 onMounted(() => {
   if (import.meta.client) {
+    currentUrl.value = window.location.href;
     open();
   }
 });
@@ -198,17 +202,26 @@ const formatSize = (bytes: number) => {
         </div>
       </div>
       
-      <!-- Connection Status -->
-      <div class="flex items-center gap-2 text-xs font-medium px-3 py-1.5 rounded-full"
-           :class="{
-             'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20': status === 'OPEN',
-             'bg-amber-500/10 text-amber-400 border border-amber-500/20': status === 'CONNECTING',
-             'bg-rose-500/10 text-rose-400 border border-rose-500/20': status === 'CLOSED'
-           }">
-        <Wifi v-if="status === 'OPEN'" :size="14" />
-        <Loader2 v-else-if="status === 'CONNECTING'" :size="14" class="animate-spin" />
-        <WifiOff v-else :size="14" />
-        <span>{{ status === 'OPEN' ? 'Connected' : status === 'CONNECTING' ? 'Connecting...' : 'Offline' }}</span>
+      <!-- Connection Status & Share -->
+      <div class="flex items-center gap-3">
+        <button 
+          @click="showQrModal = true"
+          class="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+          title="Share Room"
+        >
+          <QrCode :size="18" />
+        </button>
+        <div class="flex items-center gap-2 text-xs font-medium px-3 py-1.5 rounded-full"
+             :class="{
+               'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20': status === 'OPEN',
+               'bg-amber-500/10 text-amber-400 border border-amber-500/20': status === 'CONNECTING',
+               'bg-rose-500/10 text-rose-400 border border-rose-500/20': status === 'CLOSED'
+             }">
+          <Wifi v-if="status === 'OPEN'" :size="14" />
+          <Loader2 v-else-if="status === 'CONNECTING'" :size="14" class="animate-spin" />
+          <WifiOff v-else :size="14" />
+          <span>{{ status === 'OPEN' ? 'Connected' : status === 'CONNECTING' ? 'Connecting...' : 'Offline' }}</span>
+        </div>
       </div>
     </header>
 
@@ -281,5 +294,28 @@ const formatSize = (bytes: number) => {
         </form>
       </div>
     </footer>
+
+    <!-- QR Code Modal -->
+    <div v-if="showQrModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" @click="showQrModal = false">
+      <div class="bg-slate-900 border border-slate-700 p-6 rounded-2xl shadow-2xl max-w-sm w-full flex flex-col items-center relative animate-in fade-in zoom-in-95 duration-200" @click.stop>
+        <button @click="showQrModal = false" class="absolute top-4 right-4 p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors">
+          <X :size="20" />
+        </button>
+        
+        <div class="p-3 bg-indigo-500/10 text-indigo-400 rounded-xl mb-4">
+          <QrCode :size="28" />
+        </div>
+        <h2 class="text-xl font-bold text-white mb-2 text-center">Share Room</h2>
+        <p class="text-slate-400 text-sm text-center mb-6">Scan this QR code to join this clipboard room on another device.</p>
+        
+        <div class="bg-white p-4 rounded-xl shadow-inner mb-6">
+          <qrcode-vue :value="currentUrl" :size="200" level="M" />
+        </div>
+        
+        <div class="w-full bg-slate-950 rounded-lg p-3 flex items-center justify-between gap-3 border border-slate-800">
+          <span class="text-slate-300 text-sm font-mono truncate select-all">{{ currentUrl }}</span>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
