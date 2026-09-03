@@ -11,8 +11,16 @@
   },
   "dependencies": {
     "@clipboard-lokal/shared": "workspace:*",
+    "@lucide/vue": "^1.40.0",
+    "@vueuse/core": "^14.4.0",
+    "@vueuse/nuxt": "^14.4.0",
+    "lucide-vue-next": "^1.0.0",
     "nuxt": "^4.5.2",
     "vue": "^3.5.42",
     "vue-router": "^5.3.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "tailwindcss": "^4.3.3"
   }
 }
