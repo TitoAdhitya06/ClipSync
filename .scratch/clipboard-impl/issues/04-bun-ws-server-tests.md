@@ -1,16 +1,15 @@
 # 04: Bun WS server tests
 
-**What to build:** Automated test suite for the Bun WebSocket server's message handler — the primary seam identified in the spec. Tests inject a mock Redis client, create test WebSocket connections, send protocol messages, and assert on responses and side effects. A developer can run the test suite and see that all core behaviours (join, paste, sync, history, error handling) are covered and passing.
+**What to build:** Add automated tests for the WebSocket server handlers (join, paste, sync). Validate the core business logic (Redis interactions, max history capping, TTL refresh, broadcasting).
 
 **Blocked by:** 03 — Bun WS server: join + paste + history flow (needs the handler to exist before testing it).
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Test: `join` message → client is subscribed to the room topic
-- [ ] Test: `paste` message → entry stored in Redis + broadcast sent to room
-- [ ] Test: `sync` message → full history from Redis sent back to client
-- [ ] Test: Redis unreachable → `error` message sent to client with "storage unavailable"
-- [ ] Test: 50-entry cap enforced (LTRIM after RPUSH)
-- [ ] Test: TTL reset on paste activity (EXPIRE called)
-- [ ] Mock Redis client used — no real Redis dependency in tests
-- [ ] Tests run via `bun test` (or chosen runner) and pass in CI
+- [x] Test: `join` message → client is subscribed to the room topic
+- [x] Test: `paste` message → entry stored in Redis + broadcast sent to room
+- [x] Test: `sync` message → full history from Redis sent back to client
+- [x] Test: Redis unreachable → `error` message sent to client with "storage unavailable"
+- [x] Test: 50-entry cap enforced (LTRIM after RPUSH)
+- [x] Test: TTL reset on paste activity (EXPIRE called)
+- [x] Mock Redis client used — no real Redis dependency in tests

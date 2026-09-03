@@ -1,20 +1,20 @@
-# 05: Nuxt client — room join + live clipboard UI
+# 05: Nuxt client: room join + live clipboard UI
 
-**What to build:** The Nuxt 3 frontend where a user opens a browser, enters (or is given) a short room ID, and lands on a room page showing a live-updating clipboard timeline. Pasting text in the input instantly broadcasts it to all other devices in the room. The connection auto-reconnects after phone sleep or network blips, re-fetches missed history on reconnect, and shows connection status (connected/disconnected) so the user knows if their paste will be delivered.
+**What to build:** The core frontend features. A landing page to join a room, and the room page itself which connects to the WS server and displays the real-time clipboard list. Includes robust connection management (auto-reconnect, proactive wakeup).
 
 **Blocked by:** 03 — Bun WS server (needs a running WS server to connect to).
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Landing page with room ID input — joining navigates to `/<roomId>`
-- [ ] Room page displays a live-updating list of clipboard entries with timestamps
-- [ ] Text input field — submitting sends a `paste` message over WebSocket
-- [ ] VueUse `useWebSocket` composable: `immediate: false` + `onMounted(() => open())`
-- [ ] Auto-reconnect: unlimited retries, exponential backoff capped at 30 seconds
-- [ ] Heartbeat: interval ~30s, pong timeout 5s
-- [ ] `useDocumentVisibility()` watcher: proactive reconnect when tab/phone wakes from sleep
-- [ ] On reconnect: send `{type: "sync", roomId}` to re-fetch full history
-- [ ] Connection status indicator visible to user (connected / reconnecting / disconnected)
-- [ ] WS URL derived from `ws://${window.location.hostname}:3001` — zero config
-- [ ] Room auto-created on join (no "create room" step)
-- [ ] Works on mobile browser, tablet, and desktop (responsive layout)
+- [x] Landing page with room ID input — joining navigates to `/<roomId>`
+- [x] Room page displays a live-updating list of clipboard entries with timestamps
+- [x] Text input field — submitting sends a `paste` message over WebSocket
+- [x] VueUse `useWebSocket` composable: `immediate: false` + `onMounted(() => open())`
+- [x] Auto-reconnect: unlimited retries, exponential backoff capped at 30 seconds
+- [x] Heartbeat: interval ~30s, pong timeout 5s
+- [x] `useDocumentVisibility()` watcher: proactive reconnect when tab/phone wakes from sleep
+- [x] On reconnect: send `{type: "sync", roomId}` to re-fetch full history
+- [x] Connection status indicator visible to user (connected / reconnecting / disconnected)
+- [x] WS URL derived from `ws://${window.location.hostname}:3001` — zero config
+- [x] Room auto-created on join (no "create room" step)
+- [x] Works on mobile browser, tablet, and desktop (responsive layout)
