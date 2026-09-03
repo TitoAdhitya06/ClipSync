@@ -1,3 +1,4 @@
+import type { Server, ServerWebSocket } from 'bun';
 import { MessageType, ClipboardMessage, ClipboardEntry, HistoryMessage, ErrorMessage } from '@clipboard-lokal/shared';
 import { redis } from './redis';
 
@@ -13,7 +14,7 @@ type WebSocketData = {
 export const server = Bun.serve<WebSocketData>({
   port: PORT,
 
-  fetch(req, server) {
+  fetch(req: Request, server: Server) {
     const url = new URL(req.url);
 
     if (url.pathname === '/health') {
@@ -35,7 +36,7 @@ export const server = Bun.serve<WebSocketData>({
   websocket: {
     idleTimeout: 300,
     
-    async message(ws, message) {
+    async message(ws: ServerWebSocket<WebSocketData>, message: string | Buffer) {
       try {
         const msg = JSON.parse(message as string) as ClipboardMessage;
         
@@ -120,7 +121,7 @@ export const server = Bun.serve<WebSocketData>({
       }
     },
     
-    close(ws) {
+    close(ws: ServerWebSocket<WebSocketData>) {
       if (ws.data.roomId) {
         ws.unsubscribe(`clipboard:${ws.data.roomId}`);
       }
@@ -133,7 +134,7 @@ async function getHistory(roomId: string): Promise<ClipboardEntry[]> {
   return items.map(item => JSON.parse(item) as ClipboardEntry);
 }
 
-function sendError(ws: any, payload: string) {
+function sendError(ws: ServerWebSocket<WebSocketData>, payload: string) {
   const errMsg: ErrorMessage = {
     type: MessageType.Error,
     payload

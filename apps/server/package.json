@@ -9,5 +9,8 @@
   "dependencies": {
     "@clipboard-lokal/shared": "file:../../packages/shared",
     "ioredis": "^6.0.0"
+  },
+  "devDependencies": {
+    "bun-types": "^1.4.0"
   }
 }
