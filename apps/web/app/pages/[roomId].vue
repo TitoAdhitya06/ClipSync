@@ -60,6 +60,18 @@ onMounted(() => {
   if (import.meta.client) {
     currentUrl.value = window.location.href;
     open();
+    
+    // Automatically replace localhost with local IP for QR code
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      fetch(`${httpUrl.value}/ip`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.ip && data.ip !== 'localhost') {
+            currentUrl.value = currentUrl.value.replace(window.location.hostname, data.ip);
+          }
+        })
+        .catch(err => console.error('Failed to get local IP', err));
+    }
   }
 });
 

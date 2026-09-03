@@ -3,6 +3,7 @@ import { MessageType, ClipboardMessage, ClipboardEntry, HistoryMessage, ErrorMes
 import { mkdir, readdir, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { existsSync } from 'node:fs';
+import { networkInterfaces } from 'node:os';
 import { redis } from './redis';
 
 const PORT = process.env.NODE_ENV === 'test' ? 0 : (process.env.WS_PORT !== undefined ? Number(process.env.WS_PORT) : 3001);
@@ -24,6 +25,24 @@ export const server = Bun.serve<WebSocketData>({
 
     if (url.pathname === '/health') {
       return new Response('OK', { status: 200 });
+    }
+
+    if (url.pathname === '/ip') {
+      const nets = networkInterfaces();
+      let localIp = 'localhost';
+      for (const name of Object.keys(nets)) {
+        for (const net of nets[name] || []) {
+          if (net.family === 'IPv4' && !net.internal) {
+            localIp = net.address;
+            break;
+          }
+        }
+        if (localIp !== 'localhost') break;
+      }
+      return new Response(JSON.stringify({ ip: localIp }), { 
+        status: 200, 
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } 
+      });
     }
 
     if (url.pathname === '/upload' && req.method === 'POST') {
