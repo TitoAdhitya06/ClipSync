@@ -14,7 +14,7 @@ type WebSocketData = {
 export const server = Bun.serve<WebSocketData>({
   port: PORT,
 
-  fetch(req: Request, server: Server) {
+  fetch(req: Request, server: Server<WebSocketData>) {
     const url = new URL(req.url);
 
     if (url.pathname === '/health') {
