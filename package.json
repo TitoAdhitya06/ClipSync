@@ -1,0 +1,16 @@
+{
+  "private": true,
+  "name": "clipboard-lokal",
+  "description": "Real-time clipboard sharing across devices on local network",
+  "scripts": {
+    "dev": "pnpm --parallel -r run dev",
+    "build": "pnpm -r run build",
+    "docker:up": "docker compose up --build -d",
+    "docker:down": "docker compose down"
+  },
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=9"
+  },
+  "packageManager": "pnpm@9.15.4"
+}
