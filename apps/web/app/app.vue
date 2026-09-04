@@ -6,8 +6,16 @@ console.log('[web] Message types available:', Object.values(MessageType));
 </script>
 
 <template>
-  <div class="min-h-screen bg-slate-900 text-slate-100 selection:bg-primary/30">
-    <NuxtRouteAnnouncer />
-    <NuxtPage />
+  <div class="relative min-h-screen overflow-hidden">
+    <!-- Animated gradient orbs -->
+    <div class="orb orb-1" aria-hidden="true"></div>
+    <div class="orb orb-2" aria-hidden="true"></div>
+    <div class="orb orb-3" aria-hidden="true"></div>
+
+    <!-- Content layer -->
+    <div class="relative z-10 min-h-screen">
+      <NuxtRouteAnnouncer />
+      <NuxtPage />
+    </div>
   </div>
 </template>

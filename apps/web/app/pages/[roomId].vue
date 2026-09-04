@@ -191,33 +191,33 @@ const formatSize = (bytes: number) => {
 <template>
   <div class="flex flex-col h-screen max-h-screen">
     <!-- Header -->
-    <header class="glass-panel rounded-none! border-x-0! border-t-0! flex items-center justify-between px-4 py-3 shrink-0 z-10">
+    <header class="glass-panel shrink-0 z-10 flex items-center justify-between px-5 py-3.5" style="border-radius: 0; border-left: none; border-right: none; border-top: none;">
       <div class="flex items-center gap-3">
-        <div class="p-2 bg-primary/20 text-primary rounded-lg">
+        <div class="gradient-icon p-2.5">
           <ClipboardList :size="20" />
         </div>
         <div>
-          <h1 class="font-semibold leading-tight text-white">{{ roomId }}</h1>
-          <p class="text-xs text-slate-400">Shared Clipboard</p>
+          <h1 class="font-bold text-lg leading-tight text-text-primary">{{ roomId }}</h1>
+          <p class="text-xs text-text-muted font-medium">Shared Clipboard</p>
         </div>
       </div>
       
       <!-- Connection Status & Share -->
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2.5">
         <button 
           @click="showQrModal = true"
-          class="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+          class="icon-btn"
           title="Share Room"
         >
           <QrCode :size="18" />
         </button>
-        <div class="flex items-center gap-2 text-xs font-medium px-3 py-1.5 rounded-full"
+        <div class="status-badge"
              :class="{
-               'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20': status === 'OPEN',
-               'bg-amber-500/10 text-amber-400 border border-amber-500/20': status === 'CONNECTING',
-               'bg-rose-500/10 text-rose-400 border border-rose-500/20': status === 'CLOSED'
+               'status-connected': status === 'OPEN',
+               'status-connecting': status === 'CONNECTING',
+               'status-offline': status === 'CLOSED'
              }">
-          <Wifi v-if="status === 'OPEN'" :size="14" />
+          <Wifi v-if="status === 'OPEN'" :size="14" class="pulse-dot" />
           <Loader2 v-else-if="status === 'CONNECTING'" :size="14" class="animate-spin" />
           <WifiOff v-else :size="14" />
           <span>{{ status === 'OPEN' ? 'Connected' : status === 'CONNECTING' ? 'Connecting...' : 'Offline' }}</span>
@@ -226,49 +226,57 @@ const formatSize = (bytes: number) => {
     </header>
 
     <!-- Messages Area -->
-    <main ref="listContainer" class="flex-1 overflow-y-auto p-4 space-y-4 pb-32">
-      <div v-if="entries.length === 0" class="h-full flex flex-col items-center justify-center text-slate-500 space-y-4">
-        <ClipboardList :size="48" class="opacity-20" />
-        <p>No clipboard history yet.</p>
+    <main ref="listContainer" class="flex-1 overflow-y-auto p-4 space-y-3 pb-32">
+      <!-- Empty State -->
+      <div v-if="entries.length === 0" class="empty-state">
+        <div class="empty-state-icon">
+          <ClipboardList :size="28" />
+        </div>
+        <p class="text-base font-medium text-text-secondary">No clipboard history yet</p>
         <p class="text-sm">Paste something below to get started!</p>
       </div>
       
-      <div v-for="(entry, idx) in entries" :key="idx" class="glass-panel p-4 animate-in fade-in slide-in-from-bottom-2">
-        <div class="flex justify-between items-start mb-2">
-          <div class="text-[10px] uppercase tracking-wider font-semibold text-slate-400 bg-slate-800 px-2 py-0.5 rounded flex items-center">
+      <!-- Entry Cards -->
+      <div v-for="(entry, idx) in entries" :key="idx" class="entry-card">
+        <!-- Time Badge -->
+        <div class="flex justify-between items-start mb-2.5">
+          <div class="time-badge">
             {{ formatTime(entry.ts) }}
           </div>
         </div>
         
-        <div v-if="entry.file" class="bg-slate-900/50 p-4 rounded-lg border border-slate-700/50 flex items-center justify-between gap-4">
+        <!-- File Entry -->
+        <div v-if="entry.file" class="file-card">
           <div class="flex items-center gap-3 overflow-hidden">
-            <div class="p-2 bg-indigo-500/20 text-indigo-400 rounded">
-              <FileIcon :size="20" />
+            <div class="file-icon-wrap">
+              <FileIcon :size="18" />
             </div>
             <div class="truncate">
-              <p class="text-slate-200 font-medium truncate">{{ entry.file.name }}</p>
-              <p class="text-xs text-slate-500 mt-0.5">{{ formatSize(entry.file.size) }}</p>
+              <p class="text-text-primary font-semibold truncate text-sm">{{ entry.file.name }}</p>
+              <p class="text-xs text-text-muted mt-0.5">{{ formatSize(entry.file.size) }}</p>
             </div>
           </div>
-          <a :href="`${httpUrl}${entry.file.url}`" target="_blank" download class="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-colors shrink-0">
+          <a :href="`${httpUrl}${entry.file.url}`" target="_blank" download class="download-btn">
             <Download :size="18" />
           </a>
         </div>
-        <div v-else class="text-slate-200 whitespace-pre-wrap wrap-break-word leading-relaxed font-mono text-sm bg-slate-900/50 p-3 rounded-lg border border-slate-700/50">
-          {{ entry.text }}
-        </div>
+
+        <!-- Text Entry -->
+        <div v-else class="content-block">{{ entry.text }}</div>
       </div>
     </main>
 
     <!-- Input Area -->
-    <footer class="fixed bottom-0 left-0 right-0 p-4 bg-linear-to-t from-slate-900 via-slate-900 to-transparent">
+    <footer class="fixed bottom-0 left-0 right-0 p-4 z-20" style="background: linear-gradient(to top, var(--color-base) 60%, transparent);">
       <div class="max-w-3xl mx-auto w-full">
-        <form @submit.prevent="submitPaste" class="glass-panel p-2 flex gap-2 shadow-2xl shadow-black relative">
+        <form @submit.prevent="submitPaste" class="glass-panel p-2 flex gap-2 items-center" style="border-radius: 1.25rem; box-shadow: 0 -4px 24px rgba(99,102,241,0.08), 0 8px 32px rgba(0,0,0,0.06);">
           <input type="file" ref="fileInput" class="hidden" @change="uploadFile" />
+          
+          <!-- Attach Button -->
           <button 
             type="button" 
             @click="triggerFileUpload"
-            class="p-3 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors flex items-center justify-center shrink-0 disabled:opacity-50"
+            class="icon-btn shrink-0"
             :disabled="status !== 'OPEN' || isUploading"
             title="Upload file (Max 50MB)"
           >
@@ -276,17 +284,20 @@ const formatSize = (bytes: number) => {
             <Paperclip v-else :size="20" />
           </button>
           
+          <!-- Text Input -->
           <input 
             v-model="inputText" 
             type="text" 
             placeholder="Type or paste something..."
-            class="input-field border-none! bg-transparent! focus:ring-0! flex-1"
+            class="flex-1 bg-transparent border-none outline-none text-text-primary placeholder-text-muted py-2.5 px-1 text-[0.9375rem]"
             :disabled="status !== 'OPEN'"
             autocomplete="off"
           />
+          
+          <!-- Send Button -->
           <button 
             type="submit" 
-            class="btn-primary px-4! py-3! flex items-center justify-center shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="send-btn"
             :disabled="status !== 'OPEN' || !inputText.trim()"
           >
             <Send :size="18" class="translate-y-px -translate-x-px" />
@@ -296,28 +307,33 @@ const formatSize = (bytes: number) => {
     </footer>
 
     <!-- QR Code Modal -->
-    <div v-if="showQrModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" @click="showQrModal = false">
-      <div class="bg-slate-900 border border-slate-700 p-6 rounded-2xl shadow-2xl max-w-sm w-full flex flex-col items-center relative animate-in fade-in zoom-in-95 duration-200" @click.stop>
-        <button @click="showQrModal = false" class="absolute top-4 right-4 p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors">
+    <div v-if="showQrModal" class="modal-overlay" @click="showQrModal = false">
+      <div class="modal-card flex flex-col items-center" @click.stop>
+        <!-- Close Button -->
+        <button @click="showQrModal = false" class="icon-btn absolute top-3 right-3">
           <X :size="20" />
         </button>
         
-        <div class="p-3 bg-indigo-500/10 text-indigo-400 rounded-xl mb-4">
-          <QrCode :size="28" />
+        <!-- Modal Header -->
+        <div class="gradient-icon p-3 mb-4">
+          <QrCode :size="26" />
         </div>
-        <h2 class="text-xl font-bold text-white mb-2 text-center">Share Room</h2>
-        <p class="text-slate-400 text-sm text-center mb-6">Scan this QR code to join this clipboard room on another device.</p>
+        <h2 class="text-xl font-bold text-text-primary mb-1.5 text-center">Share Room</h2>
+        <p class="text-text-secondary text-sm text-center mb-6">Scan this QR code to join on another device.</p>
         
-        <div v-if="currentUrl.includes('localhost') || currentUrl.includes('127.0.0.1')" class="bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs p-3 rounded-lg mb-6 w-full text-center">
-          <strong>Warning:</strong> You are using localhost. Other devices won't be able to connect. Please open this app via your Wi-Fi IP address instead.
+        <!-- Localhost Warning -->
+        <div v-if="currentUrl.includes('localhost') || currentUrl.includes('127.0.0.1')" class="warning-banner mb-5 w-full">
+          <strong>Warning:</strong> You are using localhost. Other devices won't be able to connect. Use your Wi-Fi IP address instead.
         </div>
 
-        <div class="bg-white p-4 rounded-xl shadow-inner mb-6">
+        <!-- QR Code -->
+        <div class="bg-white p-5 rounded-2xl shadow-sm mb-6">
           <qrcode-vue :value="currentUrl" :size="200" level="M" />
         </div>
         
-        <div class="w-full bg-slate-950 rounded-lg p-3 flex items-center justify-between gap-3 border border-slate-800">
-          <span class="text-slate-300 text-sm font-mono truncate select-all">{{ currentUrl }}</span>
+        <!-- URL Display -->
+        <div class="url-display w-full">
+          <span class="text-text-secondary text-sm font-mono truncate select-all flex-1">{{ currentUrl }}</span>
         </div>
       </div>
     </div>
