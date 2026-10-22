@@ -28,7 +28,7 @@ const joinRoom = () => {
           Clip<span class="bg-gradient-to-r from-accent via-accent-light to-accent-pink bg-clip-text text-transparent">Sync</span>
         </h1>
         <p class="text-text-secondary text-base">
-          Share text & files across devices — instantly, no setup.
+          Share text and files across devices instantly, without setup.
         </p>
       </div>
       

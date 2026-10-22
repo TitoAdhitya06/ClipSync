@@ -4,7 +4,7 @@ import { execSync } from 'node:child_process';
 const nets = networkInterfaces();
 let localIp = 'localhost';
 
-// Try to find a real Wi-Fi or Ethernet IP
+// Locate non-internal IPv4 address on active physical network interface
 for (const name of Object.keys(nets)) {
   for (const net of nets[name] || []) {
     const isInternal = net.internal;
@@ -23,7 +23,7 @@ for (const name of Object.keys(nets)) {
 }
 
 console.log('\n================================================================');
-console.log('🚀 Starting Clipboard Lokal with Docker...');
+console.log('🚀 Starting ClipSync with Docker...');
 console.log('================================================================');
 console.log(`💻 Access on this Computer: http://localhost:3000`);
 console.log(`📱 Access on other Devices: http://${localIp}:3000`);

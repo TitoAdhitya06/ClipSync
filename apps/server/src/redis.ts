@@ -2,13 +2,10 @@ import { Redis } from 'ioredis';
 
 const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
 
-// Export a singleton Redis instance for the server to use
 export let redis: Redis;
 
 if (process.env.NODE_ENV !== 'test') {
-  redis = new Redis(REDIS_URL, {
-    // Retry strategy could be added here if needed, but default is usually fine
-  });
+  redis = new Redis(REDIS_URL);
 
   redis.on('error', (err) => {
     console.error('[redis] Connection error:', err);

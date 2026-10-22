@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "bun run --hot src/index.ts"
+    "dev": "bun run --hot src/index.ts",
+    "test": "bun test --isolate"
   },
   "dependencies": {
     "@clipboard-lokal/shared": "file:../../packages/shared",

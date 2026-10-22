@@ -53,13 +53,13 @@ export const server = Bun.serve<WebSocketData>({
       return handleFileDownload(url.pathname);
     }
 
-    // Upgrade WebSocket connections
+    // Upgrade HTTP request to WebSocket
     if (server.upgrade(req, {
       data: {
         joinedAt: Date.now(),
       }
     })) {
-      return; // upgraded
+      return;
     }
 
     return new Response('Not Found', { status: 404 });
@@ -115,7 +115,7 @@ export const server = Bun.serve<WebSocketData>({
                 .expire(key, HISTORY_TTL)
                 .exec();
                 
-              // Fetch latest history to broadcast to everyone
+              // Retrieve updated history and broadcast to room subscribers
               const history = await getHistory(roomId);
               const response: HistoryMessage = {
                 type: MessageType.History,
@@ -217,7 +217,7 @@ async function handleUpload(req: Request) {
       .expire(key, HISTORY_TTL)
       .exec();
 
-    // Broadcast history
+    // Broadcast updated history and file notification to room subscribers
     const history = await getHistory(roomId);
     const historyMsg: HistoryMessage = {
       type: MessageType.History,
@@ -226,7 +226,6 @@ async function handleUpload(req: Request) {
     };
     server.publish(`clipboard:${roomId}`, JSON.stringify(historyMsg));
 
-    // Also broadcast file-shared
     const fileSharedMsg: FileSharedMessage = {
       type: MessageType.FileShared,
       roomId,
@@ -261,7 +260,7 @@ async function handleFileDownload(pathname: string) {
   return new Response(file);
 }
 
-// Periodic cleanup (every 1 hour)
+// Hourly disk cleanup for uploaded files when the corresponding room Redis key expires
 setInterval(async () => {
   try {
     if (!existsSync(UPLOAD_DIR)) return;

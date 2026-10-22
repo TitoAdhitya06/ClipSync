@@ -1,12 +1,10 @@
-// ---------------------------------------------------------------------------
-// Message Protocol Types — Clipboard Lokal
-// ---------------------------------------------------------------------------
-// Defines the WebSocket message protocol shared between Nuxt client and
-// Bun server. Types match the spec in .scratch/clipboard-arch/spec.md.
-// ---------------------------------------------------------------------------
+/**
+ * Message protocol type definitions for ClipSync.
+ * Shared between the Nuxt client and Bun WebSocket server.
+ */
 
 /**
- * All valid message types in the clipboard protocol.
+ * Message type identifiers for clipboard operations and events.
  */
 export const MessageType = {
   Join: 'join',
@@ -19,84 +17,84 @@ export const MessageType = {
 
 export type MessageType = (typeof MessageType)[keyof typeof MessageType];
 
-// ---------------------------------------------------------------------------
-// Clipboard Entry (stored in Redis)
-// ---------------------------------------------------------------------------
-
-/** Metadata for a shared file. */
+/**
+ * Metadata for a shared file.
+ */
 export interface FileMetadata {
-  /** Original filename */
+  /** Original file name. */
   name: string;
-  /** File size in bytes */
+  /** File size in bytes. */
   size: number;
-  /** Download URL path, e.g. /files/<roomId>/<filename> */
+  /** Download URL path, for example /files/{roomId}/{filename}. */
   url: string;
 }
 
 /**
- * A single clipboard entry as stored in Redis.
- * Contains text content and a server-generated timestamp.
- * Optionally includes file metadata for file-upload entries.
+ * Clipboard entry stored in Redis.
+ * Contains text content and server timestamp, with optional file metadata.
  */
 export interface ClipboardEntry {
-  /** The text content (or description for file entries) */
+  /** Text content or file descriptor. */
   text: string;
-  /** Server-generated timestamp in unix milliseconds */
+  /** Server timestamp in Unix milliseconds. */
   ts: number;
-  /** File metadata — only present for file-upload entries */
+  /** File metadata for file upload entries. */
   file?: FileMetadata;
 }
 
-// ---------------------------------------------------------------------------
-// Message Variants (discriminated union on `type`)
-// ---------------------------------------------------------------------------
-
-/** Client → Server: join a room */
+/**
+ * Sent by client to join a specific room.
+ */
 export interface JoinMessage {
   type: typeof MessageType.Join;
   roomId: string;
 }
 
-/** Client → Server: paste new text into the room */
+/**
+ * Sent by client to add new text to the room clipboard.
+ */
 export interface PasteMessage {
   type: typeof MessageType.Paste;
   roomId: string;
   payload: string;
 }
 
-/** Client → Server: request full history re-fetch */
+/**
+ * Sent by client to request full room history synchronization.
+ */
 export interface SyncMessage {
   type: typeof MessageType.Sync;
   roomId: string;
 }
 
-/** Server → Client: full clipboard history for the room */
+/**
+ * Sent by server containing the clipboard history for the room.
+ */
 export interface HistoryMessage {
   type: typeof MessageType.History;
   roomId: string;
   payload: ClipboardEntry[];
 }
 
-/** Server → Client: error notification */
+/**
+ * Sent by server when an error occurs.
+ */
 export interface ErrorMessage {
   type: typeof MessageType.Error;
   payload: string;
 }
 
-/** Server → Client: a file was uploaded and shared in the room */
+/**
+ * Sent by server when a file is uploaded and shared in the room.
+ */
 export interface FileSharedMessage {
   type: typeof MessageType.FileShared;
   roomId: string;
   payload: ClipboardEntry;
 }
 
-// ---------------------------------------------------------------------------
-// Union type
-// ---------------------------------------------------------------------------
-
 /**
  * Discriminated union of all clipboard protocol messages.
- * Use `message.type` to narrow the variant.
  */
 export type ClipboardMessage =
   | JoinMessage
@@ -105,3 +103,4 @@ export type ClipboardMessage =
   | HistoryMessage
   | ErrorMessage
   | FileSharedMessage;
+

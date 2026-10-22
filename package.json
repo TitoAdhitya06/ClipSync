@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "pnpm --parallel -r run dev",
     "build": "pnpm -r run build",
+    "test": "pnpm --filter @clipboard-lokal/server test",
     "docker:up": "node scripts/start.mjs",
     "docker:down": "docker compose down"
   },

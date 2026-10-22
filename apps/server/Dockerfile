@@ -8,7 +8,7 @@ COPY bunfig.toml ./
 # Copy workspace configuration
 COPY package.json pnpm-workspace.yaml ./
 
-# Copy shared package (source — Bun consumes .ts directly)
+# Copy shared package source code (Bun directly executes TypeScript)
 COPY packages/shared/package.json packages/shared/
 COPY packages/shared/src/ packages/shared/src/
 COPY packages/shared/tsconfig.json packages/shared/
@@ -20,10 +20,11 @@ COPY apps/server/src/ apps/server/src/
 
 WORKDIR /app/apps/server
 
-# Install dependencies—Bun will use bunfig.toml to resolve workspace:* references
+# Install dependencies using bunfig.toml to resolve workspace packages
 RUN bun install
 
 ENV WS_PORT=3001
+ENV UPLOAD_DIR=/data/uploads
 
 EXPOSE 3001
 

@@ -1,75 +1,52 @@
-# Nuxt Minimal Starter
+# ClipSync Web
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+Web client for ClipSync, built with Nuxt 3 and Tailwind CSS.
 
-## Setup
+## Features
 
-Make sure to install dependencies:
+- Real-time clipboard synchronization with WebSocket connection.
+- File upload and download support up to 50 MB.
+- QR code modal for mobile device pairing on the local network.
+- Reactive status indicator for connection state.
+
+## Stack
+
+- Framework: Nuxt 3 with Vue 3
+- Styling: Tailwind CSS v4
+- WebSocket: `@vueuse/core`
+- Icons: `@lucide/vue`
+- QR Code: `qrcode.vue`
+
+## Development
+
+Install dependencies from the repository root:
 
 ```bash
-# npm
-npm install
-
-# pnpm
 pnpm install
-
-# yarn
-yarn install
-
-# bun
-bun install
 ```
 
-## Development Server
-
-Start the development server on `http://localhost:3000`:
+Start the Nuxt development server:
 
 ```bash
-# npm
-npm run dev
-
-# pnpm
 pnpm dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
 ```
 
-## Production
+The web client runs at `http://localhost:3000` by default.
+
+## Production build
 
 Build the application for production:
 
 ```bash
-# npm
-npm run build
-
-# pnpm
 pnpm build
-
-# yarn
-yarn build
-
-# bun
-bun run build
 ```
 
-Locally preview production build:
+Preview the production build locally:
 
 ```bash
-# npm
-npm run preview
-
-# pnpm
 pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
 ```
 
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+## Environment variables
+
+- `NUXT_PORT`: Web server port (default: `3000`).

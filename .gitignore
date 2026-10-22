@@ -1,26 +1,63 @@
 # Dependencies
 node_modules/
 
-# Nuxt
+# Nuxt and build outputs
 .nuxt/
 .output/
-
-# Build artifacts
 dist/
 
-# Environment
+# Environment and secrets
 .env
 .env.*
 !.env.example
+*.pem
+*.key
+*.cert
+*.crt
+*.pfx
+*.p12
+id_rsa*
+credentials.json
+token.json
+auth.json
 
-# OS
-.DS_Store
-Thumbs.db
+# Local runtime storage and uploads
+/data/
+uploads/
+apps/server/uploads/
 
-# IDE
+# IDE and editors
 .idea/
+.vscode/
 *.swp
 *.swo
+*.sublime-project
+*.sublime-workspace
 
-# Uploads (runtime data)
-/data/
+# Operating system files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# AI agent configurations, skills, and scratchpads
+.agents/
+.scratch/
+skills-lock.json
+docs/agents/
+.gemini/
+.claude/
+.copilot/
+.cursor/
+
+# Testing and coverage
+coverage/
+.nyc_output/
+
+# Logs and debug files
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.cache/

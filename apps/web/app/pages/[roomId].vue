@@ -19,13 +19,13 @@ const isUploading = ref(false);
 const showQrModal = ref(false);
 const currentUrl = ref('');
 
-// Format timestamp
+// Format timestamp to localized time string
 const formatTime = (ts: number) => {
   const date = new Date(ts);
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 };
 
-// WebSocket URL
+// Compute WebSocket endpoint from current browser host
 const wsUrl = computed(() => {
   if (import.meta.client) {
     return `ws://${window.location.hostname}:3001`;
@@ -33,12 +33,12 @@ const wsUrl = computed(() => {
   return '';
 });
 
-// HTTP URL for file uploads/downloads
+// Compute HTTP endpoint for file uploads and downloads
 const httpUrl = computed(() => {
   return wsUrl.value.replace('ws://', 'http://').replace('wss://', 'https://');
 });
 
-// Setup WebSocket
+// WebSocket connection with automatic reconnect and ping heartbeat
 const { status, data, send, open, close } = useWebSocket(wsUrl.value, {
   immediate: false,
   autoReconnect: {
@@ -55,7 +55,7 @@ const { status, data, send, open, close } = useWebSocket(wsUrl.value, {
   }
 });
 
-// Sync on mount
+// Initialize connection when mounted in browser
 onMounted(() => {
   if (import.meta.client) {
     currentUrl.value = window.location.href;
@@ -63,35 +63,32 @@ onMounted(() => {
   }
 });
 
-// Handle connection open -> send join or sync
+// Send join message on initial connection, or sync message after reconnecting
 watch(status, (newStatus, oldStatus) => {
   if (newStatus === 'OPEN') {
     if (oldStatus === 'CONNECTING' && entries.value.length === 0) {
-      // Initial join
       const joinMsg: JoinMessage = { type: MessageType.Join, roomId };
       send(JSON.stringify(joinMsg));
     } else {
-      // Reconnected -> sync to catch up
       const syncMsg: SyncMessage = { type: MessageType.Sync, roomId };
       send(JSON.stringify(syncMsg));
     }
   }
 });
 
-// Proactive reconnect on tab wake
+// Re-synchronize when tab becomes visible after background pause
 watch(visibility, (current) => {
   if (current === 'visible') {
     if (status.value !== 'OPEN' && status.value !== 'CONNECTING') {
       open();
     } else if (status.value === 'OPEN') {
-      // Ensure sync just in case messages were missed during sleep
       const syncMsg: SyncMessage = { type: MessageType.Sync, roomId };
       send(JSON.stringify(syncMsg));
     }
   }
 });
 
-// Scroll to bottom
+// Scroll message container to newest entry
 const scrollToBottom = async () => {
   await nextTick();
   if (listContainer.value) {
@@ -102,7 +99,7 @@ const scrollToBottom = async () => {
   }
 };
 
-// Handle incoming messages
+// Handle incoming socket messages
 watch(data, (newVal) => {
   if (!newVal || newVal === 'pong') return;
   
@@ -120,7 +117,7 @@ watch(data, (newVal) => {
   }
 });
 
-// Submit paste
+// Dispatch new text entry to room
 const submitPaste = () => {
   const text = inputText.value.trim();
   if (!text) return;
